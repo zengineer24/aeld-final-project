@@ -10,3 +10,6 @@
 	path = meta-openembedded
 	url = https://git.openembedded.org/meta-openembedded
 	branch = kirkstone
+[submodule "bitbake"]
+	path = bitbake
+	url = htts://git.openembedded.org/bitbake
