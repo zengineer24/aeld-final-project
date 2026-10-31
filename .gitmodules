@@ -12,4 +12,4 @@
 	branch = kirkstone
 [submodule "bitbake"]
 	path = bitbake
-	url = htts://git.openembedded.org/bitbake
+	url = https://github.com/openembedded/bitbake.git
