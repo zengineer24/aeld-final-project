@@ -141,10 +141,12 @@ void* packetReceiverThread(void* arg)
     struct nl_sock* packetSock = nl_socket_alloc();
     if(packetSock == NULL)
     {
+        syslog(LOG_ERR, "Packet socket was null.\n");
         return;
     }
-    if(genl_connect(packetSock) == 0)
+    if(genl_connect(packetSock) != 0)
     {
+        syslog(LOG_ERR, "Unable to connect to socket.\n");
         nl_socket_free(packetSock);
         return;
     }
@@ -178,7 +180,7 @@ void* packetReceiverThread(void* arg)
         nl_socket_free(packetSock);
         return;
     }
-
+    printf("Made it to loop\n");
     while(keepRunning)
     {
         //Keep creating new messages (in same alloc'd message) and send; wait for response
@@ -191,7 +193,7 @@ void* packetReceiverThread(void* arg)
             return;
         }
 
-        int index = if_nametoindex("enp0s3");
+        int index = if_nametoindex("wlan0");
         NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, index);
 
         if(nl_send_auto(packetSock, msg) < 0)
@@ -237,11 +239,15 @@ void* packetProcessorThread(void* arg)
         if(params->dataBufPtr->full)
         {
             uint8_t index;
-            int8_t localBuffer[AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED];
+            uint32_t localBuffer[AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED];
             AESD_CIRCULAR_BUFFER_FOREACH(params->dataBufPtr->out_offs, params->dataBufPtr, index, &localBuffer);
 
-            float mean = 0;
-            float variance = 0;
+            for(int i = 0; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++)
+            {
+                syslog(LOG_DEBUG, "%d\n", localBuffer[i]);
+            }
+            double mean = 0;
+            double variance = 0;
             for(int i = 0; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++)
             {
                 mean += localBuffer[i];
