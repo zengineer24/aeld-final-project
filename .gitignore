@@ -1,2 +1,7 @@
 bitbake-setup-venv/
 bitbake-builds/
+packet_processor/build
+packet_processor/.vscode
+packet_processor/src/*.o
+packet_processor/src/*.d
+packet_processor/src/packet_processor
