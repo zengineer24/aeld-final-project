@@ -20,8 +20,8 @@
 objects = packet_processor.o circular-buffer.o
 
 CC ?= $(CROSS_COMPILE)gcc
-CFLAGS = -g -I /usr/include/libnl3
-LDFLAGS = -lnl-3 -lnl-genl-3 -lm
+CFLAGS ?= -g -I /usr/include/libnl3
+LDFLAGS ?= -lnl-3 -lnl-genl-3 -lm
 all: packet_processor
 
 packet_processor: $(objects)
