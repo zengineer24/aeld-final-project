@@ -142,20 +142,20 @@ void* packetReceiverThread(void* arg)
     if(packetSock == NULL)
     {
         syslog(LOG_ERR, "Packet socket was null.\n");
-        return;
+        return NULL;
     }
     if(genl_connect(packetSock) != 0)
     {
         syslog(LOG_ERR, "Unable to connect to socket.\n");
         nl_socket_free(packetSock);
-        return;
+        return NULL;
     }
 
     int sockId = genl_ctrl_resolve(packetSock, "nl80211");
     if (sockId < 0) {
         syslog(LOG_ERR, "nl80211 not found.\n");
         nl_socket_free(packetSock);
-        return;
+        return NULL;
     }
     
     struct nl_msg* msg = nlmsg_alloc();
@@ -163,7 +163,7 @@ void* packetReceiverThread(void* arg)
     {
         syslog(LOG_ERR, "Failed to allocate msg");
         nl_socket_free(packetSock);
-        return;
+        return NULL;
     }
 
     struct nl_cb* cb = nl_cb_alloc(NL_CB_CUSTOM);
@@ -171,14 +171,14 @@ void* packetReceiverThread(void* arg)
     {
         syslog(LOG_ERR, "Unable to allocated call-back");
         nl_socket_free(packetSock);
-        return;
+        return NULL;
     }
 
     if(nl_cb_set(cb, NL_CB_MSG_IN, NL_CB_CUSTOM, packetCallback, arg) != 0)
     {
         syslog(LOG_ERR, "Unable to set callback function");
         nl_socket_free(packetSock);
-        return;
+        return NULL;
     }
     printf("Made it to loop\n");
     while(keepRunning)
@@ -190,7 +190,7 @@ void* packetReceiverThread(void* arg)
             syslog(LOG_ERR, "Unable to populate message");
             nlmsg_free(msg);
             nl_socket_free(packetSock);
-            return;
+            return NULL;
         }
 
         int index = if_nametoindex("wlan0");
@@ -201,7 +201,7 @@ void* packetReceiverThread(void* arg)
             syslog(LOG_ERR, "Message send failed");
             nlmsg_free(msg);
             nl_socket_free(packetSock);
-            return;
+            return NULL;
         }
 
         if(nl_recvmsgs_default(packetSock) != 0)
@@ -209,7 +209,7 @@ void* packetReceiverThread(void* arg)
             syslog(LOG_ERR, "Message receive failed");
             nlmsg_free(msg);
             nl_socket_free(packetSock);
-            return;
+            return NULL;
         }
 
         //sleep 150 ms between reads
@@ -220,12 +220,12 @@ void* packetReceiverThread(void* arg)
     nlmsg_free(msg);
     nl_socket_free(packetSock);
     //Good return
-    return;
+    return NULL;
 
     //Needed in case nla fails
     nla_put_failure:
         syslog(LOG_ERR, "Unable to build message!");
-        return;
+        return NULL;
 }
 
 void* packetProcessorThread(void* arg)
